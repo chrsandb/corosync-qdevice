@@ -97,7 +97,11 @@ create_new_noise_file() {
     if [ ! -e "$noise_file" ];then
         echo "Creating new noise file $noise_file"
 
-        (ps -elf; date; w) | sha1sum | (read sha_sum rest; echo $sha_sum) > "$noise_file"
+        if command -v sha1sum >/dev/null; then
+            (ps -elf; date; w) | sha1sum | (read sha_sum rest; echo $sha_sum) > "$noise_file"
+        else
+            dd if=/dev/urandom of="$noise_file" bs=64 count=1 2>/dev/null
+        fi
 
         chown_ref_cfgdir "$noise_file"
         chmod "$(get_perm)" "$noise_file"
