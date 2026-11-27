@@ -121,7 +121,10 @@ create_new_noise_file() {
     if [ ! -e "$noise_file" ];then
         echo "Creating new noise file $noise_file"
 
-        (ps -elf; date; w) | sha1sum | (read sha_sum rest; echo $sha_sum) > "$noise_file"
+        if ! head -c 64 /dev/urandom > "$noise_file"; then
+            rm -f -- "$noise_file"
+            return 1
+        fi
 
         chown root:root "$noise_file"
         chmod 0660 "$noise_file"
